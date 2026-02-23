@@ -12,6 +12,7 @@ const remarkOut = document.getElementById("remarkOut");
 let recordsByRoll = null;
 let appIdToRoll = null;
 let dataLoadPromise = null;
+const activeEffects = [];
 
 function setStatus(message, type = "info") {
   statusText.textContent = message;
@@ -32,6 +33,193 @@ function formatNumber(value) {
   const num = Number(value);
   if (Number.isNaN(num)) return "NA";
   return num.toLocaleString("en-IN");
+}
+
+function addEffectCleanup(cleanupFn) {
+  activeEffects.push(cleanupFn);
+}
+
+function clearEffects() {
+  while (activeEffects.length) {
+    const cleanupFn = activeEffects.pop();
+    try {
+      cleanupFn();
+    } catch {}
+  }
+}
+
+function createEffectLayer() {
+  const layer = document.createElement("div");
+  layer.style.position = "fixed";
+  layer.style.inset = "0";
+  layer.style.pointerEvents = "none";
+  layer.style.overflow = "hidden";
+  layer.style.zIndex = "9999";
+  document.body.appendChild(layer);
+  return layer;
+}
+
+function startPassEffect() {
+  clearEffects();
+  const layer = createEffectLayer();
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    layer.remove();
+    return;
+  }
+
+  layer.appendChild(canvas);
+
+  const colors = [
+    "#22c55e",
+    "#38bdf8",
+    "#facc15",
+    "#f97316",
+    "#e879f9",
+    "#fb7185",
+  ];
+  const particles = [];
+  let rafId = 0;
+  let closed = false;
+
+  function resizeCanvas() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function spawnPiece(fromTopOnly = false) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    particles.push({
+      x: Math.random() * width,
+      y: fromTopOnly ? -20 : Math.random() * height * 0.25 - height * 0.25,
+      vx: (Math.random() - 0.5) * 7,
+      vy: 2 + Math.random() * 3.8,
+      size: 5 + Math.random() * 7,
+      angle: Math.random() * Math.PI * 2,
+      spin: (Math.random() - 0.5) * 0.25,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    });
+  }
+
+  function cleanup() {
+    if (closed) return;
+    closed = true;
+    cancelAnimationFrame(rafId);
+    window.removeEventListener("resize", resizeCanvas);
+    layer.remove();
+  }
+
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+  for (let i = 0; i < 180; i += 1) spawnPiece(false);
+  const endAt = performance.now() + 2600;
+  let lastTs = performance.now();
+
+  function drawFrame(ts) {
+    if (closed) return;
+    const dt = Math.min((ts - lastTs) / 16.67, 2);
+    lastTs = ts;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    ctx.clearRect(0, 0, width, height);
+
+    if (ts < endAt) {
+      for (let i = 0; i < 7; i += 1) spawnPiece(true);
+    }
+
+    for (let i = particles.length - 1; i >= 0; i -= 1) {
+      const p = particles[i];
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += 0.08 * dt;
+      p.vx *= 0.995;
+      p.angle += p.spin * dt;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.angle);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
+      ctx.restore();
+
+      if (p.y > height + 80 || p.x < -100 || p.x > width + 100) {
+        particles.splice(i, 1);
+      }
+    }
+
+    if (ts < endAt || particles.length) {
+      rafId = requestAnimationFrame(drawFrame);
+    } else {
+      cleanup();
+    }
+  }
+
+  addEffectCleanup(cleanup);
+  rafId = requestAnimationFrame(drawFrame);
+}
+
+function startFailEffect() {
+  clearEffects();
+  const layer = createEffectLayer();
+  const emojis = ["😭", "😢", "🥲", "💧"];
+  let intervalId = 0;
+  let timeoutId = 0;
+  let closed = false;
+
+  function spawnEmoji() {
+    const drop = document.createElement("span");
+    drop.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    drop.style.position = "absolute";
+    drop.style.left = `${Math.random() * 100}vw`;
+    drop.style.top = "-12vh";
+    drop.style.fontSize = `${20 + Math.random() * 18}px`;
+    drop.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.35))";
+    drop.style.opacity = `${0.82 + Math.random() * 0.18}`;
+    layer.appendChild(drop);
+
+    const drift = (Math.random() - 0.5) * 160;
+    const rotate = (Math.random() - 0.5) * 80;
+    const duration = 1700 + Math.random() * 1500;
+    const anim = drop.animate(
+      [
+        { transform: "translate(0px, -5vh) rotate(0deg)" },
+        { transform: `translate(${drift}px, 112vh) rotate(${rotate}deg)` },
+      ],
+      {
+        duration,
+        easing: "linear",
+        fill: "forwards",
+      },
+    );
+    anim.onfinish = () => drop.remove();
+  }
+
+  function cleanup() {
+    if (closed) return;
+    closed = true;
+    window.clearInterval(intervalId);
+    window.clearTimeout(timeoutId);
+    layer.remove();
+  }
+
+  for (let i = 0; i < 24; i += 1) spawnEmoji();
+  intervalId = window.setInterval(() => {
+    for (let i = 0; i < 4; i += 1) spawnEmoji();
+  }, 180);
+
+  timeoutId = window.setTimeout(() => {
+    cleanup();
+  }, 3000);
+
+  addEffectCleanup(cleanup);
 }
 
 async function loadData() {
@@ -138,10 +326,14 @@ function renderRecord(roll, record) {
   if (result === "FAIL") resultOut.classList.add("fail");
 
   resultCard.classList.remove("hidden");
+  if (result === "PASS") startPassEffect();
+  else if (result === "FAIL") startFailEffect();
+  else clearEffects();
 }
 
 function hideRecord() {
   resultCard.classList.add("hidden");
+  clearEffects();
 }
 
 async function handleSearch() {
