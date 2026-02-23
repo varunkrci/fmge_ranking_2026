@@ -1,0 +1,143 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(160deg, #0b1220, #131a2d 45%, #0e1d36);
+  color: #e9eef8;
+}
+
+.container {
+  width: min(760px, 92vw);
+  margin: 56px auto;
+  padding: 28px;
+  background: rgba(13, 21, 36, 0.88);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 14px;
+  backdrop-filter: blur(3px);
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+}
+
+.subtitle {
+  margin: 0 0 20px;
+  color: #b8c4da;
+}
+
+.search {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  background: #0b1324;
+  color: #f8fafc;
+  font-size: 1rem;
+}
+
+input:focus {
+  outline: 2px solid #2dd4bf;
+  border-color: #2dd4bf;
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  background: #22c55e;
+  color: #06210f;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.07);
+}
+
+.status {
+  margin: 14px 2px 0;
+  color: #c5d2e7;
+}
+
+.status.error {
+  color: #fecaca;
+}
+
+.status.success {
+  color: #bbf7d0;
+}
+
+.card {
+  margin-top: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 12px;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.65);
+}
+
+.hidden {
+  display: none;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.row:last-of-type {
+  border-bottom: 0;
+}
+
+.label {
+  color: #b8c4da;
+}
+
+.pill {
+  border-radius: 999px;
+  padding: 3px 10px;
+  min-width: 68px;
+  text-align: center;
+}
+
+.pill.pass {
+  background: #14532d;
+  color: #dcfce7;
+}
+
+.pill.fail {
+  background: #7f1d1d;
+  color: #fee2e2;
+}
+
+.remark {
+  margin: 16px 0 2px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(250, 204, 21, 0.15);
+  color: #fde68a;
+  line-height: 1.5;
+}
+
+@media (max-width: 560px) {
+  .search {
+    grid-template-columns: 1fr;
+  }
+
+  button {
+    width: 100%;
+  }
+}

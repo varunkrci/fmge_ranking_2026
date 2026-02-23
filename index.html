@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FMGE Result Checker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container">
+    <h1>FMGE Result Checker</h1>
+    <p class="subtitle">Search by roll number or application ID</p>
+
+    <section class="search">
+      <input
+        id="queryInput"
+        type="text"
+        placeholder="Example: 2511200001 or FMGE25239862"
+        autocomplete="off"
+      >
+      <button id="searchBtn" type="button">Check Result</button>
+    </section>
+
+    <p id="statusText" class="status">Enter a value and click Check Result.</p>
+
+    <section id="resultCard" class="card hidden" aria-live="polite">
+      <div class="row">
+        <span class="label">Roll Number</span>
+        <strong id="rollOut"></strong>
+      </div>
+      <div class="row">
+        <span class="label">Application ID</span>
+        <strong id="appOut"></strong>
+      </div>
+      <div class="row">
+        <span class="label">Score</span>
+        <strong id="scoreOut"></strong>
+      </div>
+      <div class="row">
+        <span class="label">Result</span>
+        <strong id="resultOut" class="pill"></strong>
+      </div>
+      <div class="row">
+        <span class="label">Rank</span>
+        <strong id="rankOut"></strong>
+      </div>
+
+      <p id="remarkOut" class="remark"></p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
